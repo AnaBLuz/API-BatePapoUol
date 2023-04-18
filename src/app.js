@@ -37,7 +37,7 @@ const messageSchema = joi.object({
 // endpoints
 
 app.post("/participants", async (req, res) => {
-  const name = req.body.name;
+  const nome = req.body.name;
   const validation = participantSchema.validate(req.body)
   
   if (validation.error) {
@@ -45,14 +45,14 @@ app.post("/participants", async (req, res) => {
   }
 
   try {
-      const nomeEmUso  = await db.collection("participants").findOne({ name })
+      const nomeEmUso  = await db.collection("participants").findOne({ nome })
       if (nomeEmUso) return res.sendStatus(409)
 
       const lastStatus = Date.now()
-      await db.collection("participants").insertOne({ name, lastStatus: lastStatus })
+      await db.collection("participants").insertOne({ nome, lastStatus: lastStatus })
 
       const message = {    
-          from: name,
+          from: nome,
           to: 'Todos',
           text: 'entra na sala...',
           type: 'status',
@@ -65,6 +65,17 @@ app.post("/participants", async (req, res) => {
   } catch (err) {
       res.status(500).send(err.message)
   }
+})
+
+app.get("/participants", async (req, res) => {
+  try{
+    const participants = await db.collection("participants").find().toArray();
+    res.send(participants)
+  }
+  catch(err){
+    res.status(500).send(err.message)
+  }
+
 })
 
 
